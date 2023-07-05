@@ -1,0 +1,113 @@
+import * as React from 'react';
+import Icon from 'react-native-vector-icons/Feather';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NativeBaseProvider } from "native-base";
+
+import Home from './Screens/home';
+import Calendar from './Screens/calanderupdate';
+import DashBoard from './Screens/DashBoard';
+import Setting  from './Screens/setting'
+
+function HomeScreen() {
+  return (
+    <NativeBaseProvider>
+    <Home/>
+    </NativeBaseProvider>
+  );
+}
+
+function MapScreen() {
+  return (
+    <NativeBaseProvider>
+   <Calendar/>
+   </NativeBaseProvider>
+  );
+}
+
+function CampusScreen() {
+  return (
+    <NativeBaseProvider>
+   <DashBoard/>
+   </NativeBaseProvider>
+  );
+}
+
+function ProfileScreen() {
+  return (
+    <NativeBaseProvider>
+   <Setting/>
+   </NativeBaseProvider>
+  );
+}
+
+const Tab = createBottomTabNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+       
+        screenOptions={({ route }) => ({
+        
+          tabBarHideOnKeyboard: true,
+          
+          tabBarIcon: ({ focused, color, size }) => {
+            if (route.name === 'Home') {
+              return (
+                <Icon
+                  name={
+                    focused
+                      ? 'home'
+                      : 'home'
+                  }
+                  size={size}
+                  color={color}
+                />
+              );
+            } else if (route.name === 'DashBoard') {
+              return (
+                <Icon
+                  name={focused ? 'map-pin' : 'map-pin'}
+                  size={size}
+                  color={color}
+                />
+              );
+            }
+            else if (route.name === 'Calendar') {
+              return (
+                <Icon
+                  name={focused ? 'heart' : 'heart'}
+                  size={size}
+                  color={color}
+                />
+              );
+            }
+            else if (route.name === 'Setting') {
+              return (
+                <Icon
+                  name={focused ? 'user' : 'user'}
+                  size={size}
+                  color={color}
+                />
+              );
+            }
+          },
+          tabBarInactiveTintColor: 'gray',
+          tabBarActiveTintColor: 'tomato',
+        })}
+        
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{headerShown: false,}}
+          // options={{ tabBarBadge: 3 }}
+        />
+        <Tab.Screen name="Home" options={{headerShown: false}} component={CampusScreen} />
+        <Tab.Screen name="Timetable" options={{headerShown: false}} component={MapScreen} />
+        <Tab.Screen name="Event" options={{headerShown: false}} component={ProfileScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
