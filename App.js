@@ -12,12 +12,12 @@ function HomeScreen() {
 }
 
 function LoginScreen({ navigation }) {
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
+  const [admissionNo, setAdmissionNo] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
 
   const handleLogin = () => {
     axios
-      .get('http://192.168.43.112:8001/read')
+      .get('http://192.168.29.57:8001/teacher/classdata/read')
       .then(response => {
         console.log(response.data);
         checkLogin(response.data);
@@ -38,20 +38,18 @@ function LoginScreen({ navigation }) {
     let loginSuccessful = false;
 
     for (let i = 0; i < data.length; i++) {
-      if (name === data[i].name) {
-        if (password === data[i].code) {
-          console.log('HERE');
-          console.log(password);
-          navigation.navigate('Home');
-          setName(name);
-          loginSuccessful = true;
-        }
+      if (admissionNo === data[i].ADMISSION_NUMBER.toString() && dateOfBirth === data[i].Date_of_Birth.toString()) {
+        navigation.navigate('Home');
+        setAdmissionNo('');
+        setDateOfBirth('');
+        loginSuccessful = true;
+        break;
       }
     }
 
     if (!loginSuccessful) {
       Snackbar.show({
-        text: 'Incorrect username or password',
+        text: 'Incorrect admission number or date of birth',
         duration: Snackbar.LENGTH_SHORT,
         action: {
           textColor: '#CAD5E2',
@@ -66,18 +64,18 @@ function LoginScreen({ navigation }) {
 
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        onChangeText={text => setName(text)}
-        value={name}
-        autoCapitalize="none"
+        placeholder="Admission Number"
+        onChangeText={text => setAdmissionNo(text)}
+        value={admissionNo}
+        keyboardType="numeric"
       />
 
       <TextInput
         style={styles.input}
-        placeholder="Password"
-        onChangeText={text => setPassword(text)}
-        value={password}
-        secureTextEntry
+        placeholder="Date of Birth (e.g., 40635)"
+        onChangeText={text => setDateOfBirth(text)}
+        value={dateOfBirth}
+        keyboardType="numeric"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>

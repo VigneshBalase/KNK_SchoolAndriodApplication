@@ -1,97 +1,59 @@
-import { Button, ScrollView } from 'native-base';
-import React, { useState} from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, View, Text, Image, StyleSheet, SafeAreaView } from 'react-native';
+import { TextInput, Button } from 'react-native-paper';
+import axios from 'axios';
 
-import CustomSwitch from './customswitch';
+const Home = () => {
+  const [imageData, setImageData] = useState([]);
 
-import {Calendar} from 'react-native-calendars';
+  useEffect(() => {
+    fetchData(); // Initial data fetch
 
+    const interval = setInterval(() => {
+      fetchData();
+    },5000); // Refresh every 5 seconds (adjust the interval as needed)
 
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
-const Home = ({ title, author, date, image }) => {
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('http://192.168.29.57:8001/teacher/imageupload/read');
+      const data = response.data || [];
 
-  const [isLoading, setLoading] = useState(true);
-  const [selected, setSelected] = useState('');
+      const convertedData = data.map((image) => ({
+        ...image,
+        url: `data:image/jpeg;base64,${image.baseimage}`,
+      }));
 
-  const handelbutton = () => {
-    console.log(selected)
-  }
-
-  const onSelectSwitch = index => {
-
- if (index==1) {
-  setLoading(true)
-  
- } else {
-  setLoading(false)
- }
-
+      setImageData(convertedData.reverse()); // Reverse the array to display recently uploaded files at the top
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
+    <SafeAreaView>
+      <ScrollView>
+        <Text style={styles.titleText}>Hello, Veena B Sankappanavar</Text>
 
-  <SafeAreaView>
-    <ScrollView>
-
-    <Text style={styles.titleText}>Hello,KNK Students</Text>
-
-<View style={{marginLeft:10,marginBottom:10}}>
-<CustomSwitch
-      selectionMode={1}
-      roundCorner={true}
-      option1={'Main'}
-      option2={'Schedule'}
-      onSelectSwitch={onSelectSwitch}
-      selectionColor={'white'}
-    />
-  </View>
-
-
-      {isLoading ? (
-      <><View style={styles.card}>
-      <View style={styles.content}>
-      <Image source={{ uri: 'https://th-i.thgim.com/public/incoming/8bb5nr/article65407753.ece/alternates/FREE_1200/2699_12_5_2022_17_58_4_1_13HUBLIKLEIT.JPG', }} style={styles.image} />
-        <Text style={styles.title}>KLE Institute of Technology{title}</Text>
-        <Text style={styles.author}>10min ago from Admin Department{author}</Text>
-        <Text style={styles.info}>{date}The K.L.E Society's KLE Institute of Technology is an engineering college in Hubli, India. Established in 2008, it is one of the institutes under the banner of Karnatak Lingayat Education Society. KLEIT is approved by the AICTE and recognized by University Grant Commission of India.
-  </Text>
-      </View>
-    </View>
-    <View style={styles.card}>
-      <View style={styles.content}>
-      <Image source={{ uri: 'https://cache.careers360.mobi/media/colleges/social-media/media-gallery/4075/2021/8/5/Campus%20View%20of%20KLE%20Institute%20of%20Technology%20Hubli_Campus-View.jpg', }} style={styles.image} />
-        <Text style={styles.title}>Title{title}</Text>
-        <Text style={styles.author}>10min ago from Admin Department{author}</Text>
-        <Text style={styles.info}>10min ago{date}</Text>
-      </View>
-    </View></>
-      ) : (
-
-    <>
-        <Calendar
-        onDayPress={day => {
-          setSelected(day.dateString);
-        }}
-        markedDates={{
-          [selected]: {selected: true, disableTouchEvent: true, selectedDotColor: 'orange'},
-          '2023-06-26': {selected: true, selectedColor: 'green'}
-        }}
-
-      />
-{/* 
-      <Button onPress={handelbutton()}>
-        Button
-      </Button> */}
-
-<View style={styles.card}>
-      <View style={styles.content}>
-       <Text style={styles.title}>3rd Phase Review{title}</Text>
-      </View>
-    </View>
-
-      </>
-      )}
-</ScrollView>
+        {/* Render the image data */}
+        {imageData.map((image, index) => (
+          <View key={index} style={styles.card}>
+            <View style={styles.content}>
+              {image.url ? (
+                <Image source={{ uri: image.url }} style={styles.image} />
+              ) : (
+                <Text>No Image Found</Text>
+              )}
+              <Text style={styles.title}>{image.head}</Text>
+              <Text style={styles.info}>{image.description}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -121,10 +83,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  author: {
-    marginTop: 5,
-    fontSize: 16,
-  },
   info: {
     marginTop: 5,
     fontSize: 14,
@@ -132,11 +90,11 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 25,
-    fontWeight: "bold",
-    color:"#242B2E",
-    marginTop:15,
-    marginLeft:20,
-    marginBottom:10,
+    fontWeight: 'bold',
+    color: '#242B2E',
+    marginTop: 15,
+    marginLeft: 20,
+    marginBottom: 10,
   },
 });
 

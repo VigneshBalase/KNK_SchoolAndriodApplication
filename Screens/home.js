@@ -9,7 +9,7 @@ import { NativeBaseProvider } from 'native-base';
 import Calendar from './calendar';
 import Event from './Event';
 import Timetable from './timetable1';
-import Chat from './Homechat';
+import Chat from './Chat';
 import Settings from './setting';
 
 function HomeScreen() {
