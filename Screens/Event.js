@@ -20,7 +20,7 @@ const Home = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://192.168.29.57:8001/teacher/imageupload/read');
+      const response = await axios.get('http://192.168.43.112:8001/teacher/imageupload/read');
       const data = response.data || [];
 
       const convertedData = data.map((image) => ({

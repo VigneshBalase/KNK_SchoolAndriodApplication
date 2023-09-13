@@ -17,7 +17,7 @@ function LoginScreen({ navigation }) {
 
   const handleLogin = () => {
     axios
-      .get('http://192.168.29.57:8001/teacher/classdata/read')
+      .get('http://192.168.43.112:8001/teacher/classdata/read')
       .then(response => {
         console.log(response.data);
         checkLogin(response.data);

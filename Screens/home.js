@@ -89,8 +89,8 @@ export default function Home() {
                 tabBarActiveTintColor: 'tomato',
               })}
             >
-              <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-              <Tab.Screen name="Event" component={EventScreen} options={{ headerShown: false }} />
+              <Tab.Screen name="Home" component={EventScreen} options={{ headerShown: false }} />
+              <Tab.Screen name="Event" component={HomeScreen} options={{ headerShown: false }} />
               <Tab.Screen name="Timetable" component={TimetableScreen} options={{ headerShown: false }} />
               <Tab.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }} />
               <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false }} />

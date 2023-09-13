@@ -1,76 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import axios from 'axios';
+import Snackbar from 'react-native-snackbar'; // Import the snackbar
 
 const CalendarScreen = () => {
-  const [calendarData, setCalendarData] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
 
   useEffect(() => {
-    fetchCalendarData();
+    fetchAttendanceData();
   }, []);
 
-  const fetchCalendarData = async () => {
+  const fetchAttendanceData = async () => {
     try {
-      // Simulating API fetch
-      const data = [
-        { date: '2023-06-29', type: 'important', description: 'Bakrid/Eid ui-Adha' },
-        {date: '2023-06-26', type: 'attendance', description: 'Present' },
-        { date: '2023-06-24', type: 'attendance', description: 'Present' },
-        { date: '2023-06-23', type: 'attendance', description: 'Absent' },
-      ];
-
-      setCalendarData(data);
+      const response = await axios.get('http://192.168.43.112:8001/teacher/attendanceupdate/read');
+      const data = response.data;
+      setAttendanceData(data);
     } catch (error) {
-      console.error('Error fetching calendar data:', error);
+      console.error('Error fetching attendance data:', error);
     }
   };
 
   const renderCalendarWithEvents = () => {
     const markedDates = {};
 
-    calendarData.forEach((event) => {
-      const { date, type, description } = event;
+    attendanceData.forEach((attendanceRecord) => {
+      const { date, className: selectedClass, absentNames } = attendanceRecord;
 
-      let markColor = '#FF0000'; // Default color for events
+      const formattedDate = date.slice(0, 10); // Extracting only the date part (YYYY-MM-DD)
 
-      if (type === 'important') {
-        markColor = '#FF0000'; // Custom color for important days
-      } else if (type === 'attendance') {
-        markColor = description === 'Present' ? '#00FF00' : '#FF0000'; // Green for 'Present', Red for 'Absent'
+      let markedData = {
+        selected: true,
+        marked: true,
+        selectedColor: '#FF5733', // Default color for absent students
+        class: selectedClass,
+        absentNames: absentNames.join(', '),
+      };
+
+      // Check if Veena B Sankappanavar is present or absent on this date
+      if (absentNames.includes('Veena B Sankappanavar')) {
+        markedData.selectedColor = '#FF5733'; // Red for absent
+      } else {
+        markedData.selectedColor = '#00FF00'; // Green for present
       }
 
-      markedDates[date] = { selected: true, marked: true, dotColor: markColor, description };
+      markedDates[formattedDate] = markedData;
     });
 
     return (
       <Calendar
         markedDates={markedDates}
         onDayPress={(day) => {
-          setSelectedDate(day.dateString);
           console.log('Selected date:', day.dateString);
+          const attendanceRecord = markedDates[day.dateString];
+          if (attendanceRecord.absentNames.length > 0) {
+            console.log('Absent students:', attendanceRecord.absentNames);
+          } else {
+            console.log('All students present.');
+          }
+
+          // Show snackbar message for Veena B Sankappanavar's attendance status
+          if (attendanceRecord.absentNames.includes('Veena B Sankappanavar')) {
+            Snackbar.show({
+              text: 'Veena B Sankappanavar is absent on this date.',
+              duration: Snackbar.LENGTH_LONG,
+            });
+          } else {
+            Snackbar.show({
+              text: 'Veena B Sankappanavar is present on this date.',
+              duration: Snackbar.LENGTH_LONG,
+            });
+          }
         }}
       />
     );
   };
 
-  const getAttendanceStatus = (date) => {
-    const event = calendarData.find((event) => event.date === date);
-    if (event && event.type === 'attendance') {
-      return event.description;
-    } else if (event && event.type === 'important') {
-      return event.description;
-    }
-    return 'Normal day';
-  };
-
   return (
     <View style={styles.container}>
       {renderCalendarWithEvents()}
-      <View style={styles.selectedDateContainer}>
-        <Text style={styles.selectedDateText}>Selected Date: {selectedDate}</Text>
-        <Text style={styles.descriptionText}>Description: {getAttendanceStatus(selectedDate)}</Text>
-      </View>
     </View>
   );
 };
@@ -80,19 +88,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     padding: 20,
-  },
-  selectedDateContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  selectedDateText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2d4150',
-  },
-  descriptionText: {
-    fontSize: 16,
-    marginTop: 10,
   },
 });
 
