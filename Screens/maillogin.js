@@ -1,5 +1,3 @@
-// File: App.js
-
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -12,7 +10,7 @@ import {
 } from 'react-native';
 import Snackbar from 'react-native-snackbar';
 import Axios from 'axios';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Picker } from '@react-native-picker/picker';
 
@@ -28,24 +26,16 @@ const classes = [
 function HomeScreen({ route }) {
   const { classData } = route.params;
 
-  if (!classData) {
-    return (
-      <View style={styles.container}>
-        <Text>No data available</Text>
-      </View>
-    );
-  }
-
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.title}>Class {classData.CLASS_NUMBER}</Text>
-        <Text>Student Name: {classData.Student_Name}</Text>
-        <Text>Father Name: {classData.Father_Name}</Text>
-        <Text>Mother Name: {classData.Mother_Name}</Text>
-        <Text>Date of Birth: {classData.Date_of_Birth}</Text>
-        <Text>Mobile No: {classData.Mobile_No}</Text>
-        <Text>Email ID: {classData.Email_id}</Text>
+        <Text style={styles.title}>Class {classData?.CLASS_NUMBER}</Text>
+        <Text>Student Name: {classData?.Student_Name}</Text>
+        <Text>Father Name: {classData?.Father_Name}</Text>
+        <Text>Mother Name: {classData?.Mother_Name}</Text>
+        <Text>Date of Birth: {classData?.Date_of_Birth}</Text>
+        <Text>Mobile No: {classData?.Mobile_No}</Text>
+        <Text>Email ID: {classData?.Email_id}</Text>
       </View>
     </ScrollView>
   );
@@ -58,9 +48,10 @@ export default function App() {
   const [step, setStep] = useState(1);
   const [selectedClass, setSelectedClass] = useState('');
   const [studentData, setStudentData] = useState({});
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
-    var admissionNumberRegex = /^[0-9]{4}$/; // Regex for 4 digits admission number.
+    var admissionNumberRegex = /^[0-9]{4}$/;
 
     if (step === 1) {
       if (selectedClass.length === 0 || admissionNumber.length === 0 || emailId.length === 0) {
@@ -71,12 +62,12 @@ export default function App() {
         });
       } else if (admissionNumberRegex.test(admissionNumber)) {
         try {
-          const response = await Axios.post('http://172.20.10.9:8001/mailsent', {
+          const response = await Axios.post('http://192.168.43.112:8001/mailsent', {
             emailId: emailId,
           });
 
           if (response.data && response.data.success) {
-            setStep(2); // Move to step 2: Enter OTP
+            setStep(2);
           } else {
             Snackbar.show({
               text: 'Email ID not found for the given admission number',
@@ -86,7 +77,7 @@ export default function App() {
           }
         } catch (error) {
           console.error('Error:', error);
-          console.log('Error Response:', error.response); // Log the error response for debugging
+          console.log('Error Response:', error.response);
           handleAxiosError(error);
         }
       } else {
@@ -115,7 +106,6 @@ export default function App() {
   };
 
   const handleOtpSubmit = async () => {
-    // Validate the OTP and log in if it is correct.
     try {
       const response = await Axios.post('http://192.168.43.112:8001/otpreceive', {
         emailId: emailId,
@@ -128,8 +118,9 @@ export default function App() {
           duration: Snackbar.LENGTH_SHORT,
           backgroundColor: '#242B2E',
         });
-        setStep(3); // Move to step 3: Display HomeScreen
+        setStep(3);
         setStudentData(response.data.student);
+        navigation.replace('Home', { classData: response.data.student });
       } else {
         Snackbar.show({
           text: 'Invalid OTP, please try again',
@@ -146,9 +137,8 @@ export default function App() {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Image source={require('./Src/final1logo.png')} style={styles.logo} />
         <View style={styles.formContainer}>
-          <Text style={styles.title}>KLEIT Student Center</Text>
+          <Text style={styles.title}>KNK Girls High School</Text>
           {step === 1 ? (
             <React.Fragment>
               <Picker
@@ -203,12 +193,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  logo: {
-    alignSelf: 'center',
-    width: 200,
-    height: 200,
-    marginTop: 100,
   },
   formContainer: {
     justifyContent: 'center',
